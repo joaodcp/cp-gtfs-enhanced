@@ -30,8 +30,16 @@ jobs:
               with:
                   name: cp-gtfs-enhanced
                   path: enhanced/*.zip
+
+            - name: set date tag
+              id: date
+              run: echo "today=$(date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+
             - name: release gtfs
               if: success()
               uses: softprops/action-gh-release@v2
               with:
+                  tag_name: ${{ steps.date.outputs.today }}
+                  name: cp-gtfs-enhanced
                   files: enhanced/*.zip
+                  draft: false
