@@ -19,7 +19,7 @@ jobs:
               run: pip install -r requirements.txt
 
             - name: run pipeline
-              run: python scripts/run.py
+              run: python enhance.py
 
             - name: upload gtfs
               if: success()
