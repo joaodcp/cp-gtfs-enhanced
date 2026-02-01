@@ -17,13 +17,17 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - name: skip if already released today (schedule event)
+            - name: check if gtfs was updated today (cron only)
               if: github.event_name == 'schedule'
               run: |
-                  today=$(date +'%Y.%m.%d')
-                  if git tag --list | grep -q "$today"; then
-                    echo "already ran today, exiting"
-                    exit 0
+                  today=$(date -u '+%d %b %Y')
+                  # fetch remote last-modified header
+                  lm=$(curl -sI https://publico.cp.pt/gtfs/gtfs.zip | grep -i Last-Modified | cut -d' ' -f2-)
+                  if [[ "$lm" == *"$today"* ]]; then
+                      echo "gtfs updated today, continuing"
+                  else
+                      echo "no update today, exiting"
+                      exit 0
                   fi
 
             - uses: actions/setup-python@v5
