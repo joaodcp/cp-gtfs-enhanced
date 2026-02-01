@@ -43,6 +43,6 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                   tag_name: ${{ steps.date.outputs.today }}
-                  name: cp-gtfs-enhanced
+                  name: Enhanced GTFS (${{ steps.date.outputs.today }})
                   files: enhanced/*.zip
                   draft: false
