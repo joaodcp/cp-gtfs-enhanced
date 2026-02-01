@@ -183,7 +183,7 @@ def run():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"cp_gtfs_enhanced_{timestamp}.zip"
+    output_filename = f"cp_gtfs_enhanced.zip"
     output_path = os.path.join(OUTPUT_DIR, output_filename)
     
     print(f"creating enhanced gtfs package at {output_path}...")
