@@ -1,8 +1,8 @@
 name: Download and Enhance CP GTFS
 
 on:
-    # schedule:
-    #     - cron: "*/5 1 * * *"
+    schedule:
+        - cron: "*/6 1 * * *"
     workflow_dispatch:
     push:
         branches:
@@ -16,6 +16,15 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
+
+            - name: skip if already released today (schedule event)
+              if: github.event_name == 'schedule'
+              run: |
+                  today=$(date +'%Y.%m.%d')
+                  if git tag --list | grep -q "$today"; then
+                    echo "already ran today, exiting"
+                    exit 0
+                  fi
 
             - uses: actions/setup-python@v5
               with:
