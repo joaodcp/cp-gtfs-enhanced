@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 GTFS_URL = "https://publico.cp.pt/gtfs/gtfs.zip"
-OUTPUT_DIR = "/data/enhanced"
+OUTPUT_DIR = "./enhanced"
 CP_GIS_API_URL = "https://api-gateway.cp.pt/cp/services/gis-api/train-path/{trip_short_name}"
 
 def get_gtfs_zip():
