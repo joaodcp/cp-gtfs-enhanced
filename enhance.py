@@ -42,16 +42,26 @@ def get_trip_details(trip_ids):
     res.raise_for_status()
     return res.json()
 
-def get_trip_shape(trip_id):
+def get_trip_shape(trip_id, max_retries=3):
     print(f"Fetching shape for trip: {trip_id}")
-    res = requests.get(CP_GIS_API_URL.format(trip_short_name=trip_id), headers={
-        'x-api-key': '8a208a6c-03e8-41f4-a39a-cec47cd7b446',
-        'x-cp-connect-id': 'edc64b3e659cfecf2f4e154dc6cef3c7',
-        'x-cp-connect-secret': '0bf2222674b8a419c8afe426d8a70465'
-    })
-    if res.status_code != 200:
-        return None
-    return res.json()
+    for attempt in range(max_retries):
+        try:
+            res = requests.get(CP_GIS_API_URL.format(trip_short_name=trip_id), headers={
+                'x-api-key': '8a208a6c-03e8-41f4-a39a-cec47cd7b446',
+                'x-cp-connect-id': 'edc64b3e659cfecf2f4e154dc6cef3c7',
+                'x-cp-connect-secret': '0bf2222674b8a419c8afe426d8a70465'
+            }, timeout=30)
+            if res.status_code != 200:
+                return None
+            return res.json()
+        except requests.exceptions.RequestException as e:
+            print(f"  Attempt {attempt + 1}/{max_retries} failed: {e}")
+            if attempt < max_retries - 1:
+                print("  Retrying...")
+                sleep(2)
+            else:
+                print(f"  Failed to fetch shape for trip {trip_id} after {max_retries} attempts")
+                return None
 
 
 def enhance_stops(stops_txt):
