@@ -86,9 +86,9 @@ def run():
     stations_platforms = {}
     trips_platforms = {}
     # Dict keyed by shape JSON string -> {'trips': [...], 'shape': shape_data}
-    shapes_dict = {}
+    keyed_shapes = {}
 
-    MAX_TRIPS = 10
+    MAX_TRIPS = 30
     # all_trips_details = get_trip_details([int(trip['trip_short_name']) for trip in trips[:MAX_TRIPS]])
     all_trips_details = get_trip_details([int(trip['trip_short_name']) for trip in trips])
 
@@ -102,14 +102,13 @@ def run():
                         stations_platforms[stop_id] = set()
                     stations_platforms[stop_id].add(int(platform))
 
-        # shape = get_trip_shape(trip_short_name)
-        # if shape is not None:
-        #     # Use JSON string as key to check for duplicates
-        #     shape_key = json.dumps(shape, sort_keys=True)
-        #     if shape_key in shapes_dict:
-        #         shapes_dict[shape_key]['trips'].append(trip_short_name)
-        #     else:
-        #         shapes_dict[shape_key] = {'trips': [trip_short_name], 'shape': shape}
+        shape = get_trip_shape(trip_short_name)
+        if shape is not None:
+            shape_key = json.dumps(shape, sort_keys=True)
+            if shape_key in keyed_shapes:
+                keyed_shapes[shape_key]['trips'].append(trip_short_name)
+            else:
+                keyed_shapes[shape_key] = {'trips': [trip_short_name], 'shape': shape}
     
     # Convert back to list of tuples if needed: [(trips_list, shape), ...]
     # trips_shapes = [(data['trips'], data['shape']) for data in shapes_dict.values()]
@@ -157,6 +156,26 @@ def run():
             stop_id = stop_id.replace("-", "_")
             stop_time['stop_id'] = f"{stop_id}_0"
 
+
+    shapes_rows = []
+
+    for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
+        print(shape_data)
+        for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
+            shapes_rows.append({
+                'shape_id': f'shp_{idx}',
+                'shape_pt_lat': point[1],
+                'shape_pt_lon': point[0],
+                'shape_pt_sequence': pt_idx
+            })
+
+    for trip in trips:
+        trip_short_name = trip['trip_short_name']
+        for shape_key, shape_data in keyed_shapes.items():
+            if trip_short_name in shape_data['trips']:
+                trip['shape_id'] = f'shp_{list(keyed_shapes.keys()).index(shape_key)}'
+                break
+
     # with open('enhanced_stop_times.txt', 'w', encoding='utf-8', newline='') as f:
     #     writer = csv.DictWriter(f, fieldnames=stop_times[0].keys())
     #     writer.writeheader()
@@ -182,7 +201,7 @@ def run():
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_filename = f"cp_gtfs_enhanced.zip"
     output_path = os.path.join(OUTPUT_DIR, output_filename)
     
@@ -202,10 +221,24 @@ def run():
         writer.writerows(stop_times)
         enhanced_zip.writestr('stop_times.txt', stop_times_output.getvalue())
         print("wrote enhanced stop_times.txt")
+
+        shapes_output = io.StringIO()
+        writer = csv.DictWriter(shapes_output, fieldnames=shapes_rows[0].keys())
+        writer.writeheader()
+        writer.writerows(shapes_rows)
+        enhanced_zip.writestr('shapes.txt', shapes_output.getvalue())
+        print("wrote enhanced shapes.txt")
+
+        trips_output = io.StringIO()
+        writer = csv.DictWriter(trips_output, fieldnames=trips[0].keys())
+        writer.writeheader()
+        writer.writerows(trips)
+        enhanced_zip.writestr('trips.txt', trips_output.getvalue())
+        print("wrote enhanced trips.txt")
         
         # Copy all other files from original GTFS unchanged
         for file_info in gtfs_zip.filelist:
-            if file_info.filename not in ['stops.txt', 'stop_times.txt']:
+            if file_info.filename not in ['stops.txt', 'stop_times.txt', 'shapes.txt', 'trips.txt']:
                 enhanced_zip.writestr(file_info.filename, gtfs_zip.read(file_info.filename))
                 print(f"copied {file_info.filename}")
     
