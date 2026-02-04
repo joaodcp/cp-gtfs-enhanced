@@ -160,7 +160,6 @@ def run():
     shapes_rows = []
 
     for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
-        print(shape_data)
         for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
             shapes_rows.append({
                 'shape_id': f'shp_{idx}',
