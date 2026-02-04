@@ -1,3 +1,4 @@
+from time import sleep
 import requests
 import zipfile
 import io
@@ -28,7 +29,7 @@ def get_station_arrivals(station_id, date, start_time):
     return res.json()['stationStops']
 
 def get_trip_details(trip_ids):
-    print("Fetching trip details for trip IDs:", trip_ids)
+    print("Fetching trip details for trips:", trip_ids)
     res = requests.post(
         "https://api-gateway.cp.pt/cp/services/realtime-api/trains/details",
         json=trip_ids,
@@ -42,6 +43,7 @@ def get_trip_details(trip_ids):
     return res.json()
 
 def get_trip_shape(trip_id):
+    print(f"Fetching shape for trip: {trip_id}")
     res = requests.get(CP_GIS_API_URL.format(trip_short_name=trip_id), headers={
         'x-api-key': '8a208a6c-03e8-41f4-a39a-cec47cd7b446',
         'x-cp-connect-id': 'edc64b3e659cfecf2f4e154dc6cef3c7',
@@ -109,6 +111,7 @@ def run():
                 keyed_shapes[shape_key]['trips'].append(trip_short_name)
             else:
                 keyed_shapes[shape_key] = {'trips': [trip_short_name], 'shape': shape}
+        sleep(2)  # to avoid hitting API rate limits
     
     # Convert back to list of tuples if needed: [(trips_list, shape), ...]
     # trips_shapes = [(data['trips'], data['shape']) for data in shapes_dict.values()]
