@@ -176,9 +176,14 @@ def run():
             stop_time['stop_id'] = f"{stop_id}_0"
 
 
-    if not is_gha:
+    if is_gha:
+        trip_shapes = json.load(open('./preprocessed/trip_shapes.json', 'r'))
+        for trip in trips:
+            trip_short_name = trip['trip_short_name']
+            if trip_short_name in trip_shapes:
+                trip['shape_id'] = trip_shapes[trip_short_name]
+    else:
         shapes_rows = []
-
         for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
             for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
                 shapes_rows.append({
@@ -193,13 +198,7 @@ def run():
             for shape_key, shape_data in keyed_shapes.items():
                 if trip_short_name in shape_data['trips']:
                     trip['shape_id'] = f'shp_{list(keyed_shapes.keys()).index(shape_key)}'
-                    break
-        else:
-            trip_shapes = json.load(open('./preprocessed/trip_shapes.json', 'r'))
-            for trip in trips:
-                trip_short_name = trip['trip_short_name']
-                if trip_short_name in trip_shapes:
-                    trip['shape_id'] = trip_shapes[trip_short_name]
+                    break   
 
     # with open('enhanced_stop_times.txt', 'w', encoding='utf-8', newline='') as f:
     #     writer = csv.DictWriter(f, fieldnames=stop_times[0].keys())
