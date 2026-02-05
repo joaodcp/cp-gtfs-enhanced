@@ -7,6 +7,8 @@ import json
 import os
 from datetime import datetime
 
+is_gha = os.getenv("GITHUB_ACTIONS") == "true"
+
 GTFS_URL = "https://publico.cp.pt/gtfs/gtfs.zip"
 OUTPUT_DIR = "./enhanced"
 CP_GIS_API_URL = "https://api-gateway.cp.pt/cp/services/gis-api/train-path/{trip_short_name}"
@@ -104,6 +106,8 @@ def run():
     # all_trips_details = get_trip_details([int(trip['trip_short_name']) for trip in trips[:MAX_TRIPS]])
     all_trips_details = get_trip_details([int(trip['trip_short_name']) for trip in trips])
 
+    processed_trips = 0
+
     for trip_short_name, details in all_trips_details.items():
         if details['platforms']:
             trips_platforms[trip_short_name] = details['platforms']
@@ -114,15 +118,17 @@ def run():
                         stations_platforms[stop_id] = set()
                     stations_platforms[stop_id].add(int(platform))
 
-        shape = get_trip_shape(trip_short_name)
-        if shape is not None:
-            shape_key = json.dumps(shape, sort_keys=True)
-            if shape_key in keyed_shapes:
-                keyed_shapes[shape_key]['trips'].append(trip_short_name)
-            else:
-                keyed_shapes[shape_key] = {'trips': [trip_short_name], 'shape': shape}
-        sleep(2)  # to avoid hitting API rate limits
-    
+        if not is_gha:
+            print(f"Processing trip {processed_trips + 1}/{len(all_trips_details)}: {trip_short_name}")
+            shape = get_trip_shape(trip_short_name)
+            if shape is not None:
+                shape_key = json.dumps(shape, sort_keys=True)
+                if shape_key in keyed_shapes:
+                    keyed_shapes[shape_key]['trips'].append(trip_short_name)
+                else:
+                    keyed_shapes[shape_key] = {'trips': [trip_short_name], 'shape': shape}
+            # sleep(2)  # to avoid hitting API rate limits
+            processed_trips += 1
     # Convert back to list of tuples if needed: [(trips_list, shape), ...]
     # trips_shapes = [(data['trips'], data['shape']) for data in shapes_dict.values()]
 
@@ -170,23 +176,30 @@ def run():
             stop_time['stop_id'] = f"{stop_id}_0"
 
 
-    shapes_rows = []
+    if not is_gha:
+        shapes_rows = []
 
-    for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
-        for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
-            shapes_rows.append({
-                'shape_id': f'shp_{idx}',
-                'shape_pt_lat': point[1],
-                'shape_pt_lon': point[0],
-                'shape_pt_sequence': pt_idx
-            })
+        for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
+            for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
+                shapes_rows.append({
+                    'shape_id': f'shp_{idx}',
+                    'shape_pt_lat': point[1],
+                    'shape_pt_lon': point[0],
+                    'shape_pt_sequence': pt_idx
+                })
 
-    for trip in trips:
-        trip_short_name = trip['trip_short_name']
-        for shape_key, shape_data in keyed_shapes.items():
-            if trip_short_name in shape_data['trips']:
-                trip['shape_id'] = f'shp_{list(keyed_shapes.keys()).index(shape_key)}'
-                break
+        for trip in trips:
+            trip_short_name = trip['trip_short_name']
+            for shape_key, shape_data in keyed_shapes.items():
+                if trip_short_name in shape_data['trips']:
+                    trip['shape_id'] = f'shp_{list(keyed_shapes.keys()).index(shape_key)}'
+                    break
+        else:
+            trip_shapes = json.load(open('./preprocessed/trip_shapes.json', 'r'))
+            for trip in trips:
+                trip_short_name = trip['trip_short_name']
+                if trip_short_name in trip_shapes:
+                    trip['shape_id'] = trip_shapes[trip_short_name]
 
     # with open('enhanced_stop_times.txt', 'w', encoding='utf-8', newline='') as f:
     #     writer = csv.DictWriter(f, fieldnames=stop_times[0].keys())
@@ -234,12 +247,17 @@ def run():
         enhanced_zip.writestr('stop_times.txt', stop_times_output.getvalue())
         print("wrote enhanced stop_times.txt")
 
-        shapes_output = io.StringIO()
-        writer = csv.DictWriter(shapes_output, fieldnames=shapes_rows[0].keys())
-        writer.writeheader()
-        writer.writerows(shapes_rows)
-        enhanced_zip.writestr('shapes.txt', shapes_output.getvalue())
-        print("wrote enhanced shapes.txt")
+        if is_gha:
+            with open('./preprocessed/shapes.txt', 'r', encoding='utf-8') as f:
+                enhanced_zip.writestr('shapes.txt', f.read())
+            print("wrote preprocessed shapes.txt")
+        else:
+            shapes_output = io.StringIO()
+            writer = csv.DictWriter(shapes_output, fieldnames=shapes_rows[0].keys())
+            writer.writeheader()
+            writer.writerows(shapes_rows)
+            enhanced_zip.writestr('shapes.txt', shapes_output.getvalue())
+            print("wrote enhanced shapes.txt")
 
         trips_output = io.StringIO()
         writer = csv.DictWriter(trips_output, fieldnames=trips[0].keys())
@@ -247,6 +265,7 @@ def run():
         writer.writerows(trips)
         enhanced_zip.writestr('trips.txt', trips_output.getvalue())
         print("wrote enhanced trips.txt")
+
         
         # Copy all other files from original GTFS unchanged
         for file_info in gtfs_zip.filelist:
