@@ -5,5 +5,7 @@ The feed is then enhanced with shapes and platform codes, extracted from CP APIs
 
 You can access a non-official realtime feed here:
 
-- https://cp-gtfsrt.jdcp.workers.dev/pb (that works with their untouched feed)
-- https://cp-gtfsrt.jdcp.workers.dev/pb?includes=platforms (that works with the enhanced versions released here)
+- https://cp-gtfsrt.jdcp.workers.dev/vehicle-positions/pb
+- https://cp-gtfsrt.jdcp.workers.dev/trip-updates/pb
+
+You can add the query param includes=platforms to use the realtime feed with the platform information the enhanced versions released here have.
