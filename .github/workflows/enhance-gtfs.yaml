@@ -52,7 +52,7 @@ jobs:
                     --volume ${{ github.workspace }}/gtfs-out:/gtfs-out \
                     ghcr.io/ad-freiburg/pfaedle:latest \
                     -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_enhanced.zip
-                  mv gtfs-out/cp_gtfs_enhanced.zip enhanced/cp_gtfs_enhanced.zip
+                  cd gtfs-out && zip -r ../enhanced/cp_gtfs_enhanced.zip *.txt
 
             - name: upload gtfs
               if: success()
