@@ -157,10 +157,18 @@ def run():
                 'wheelchair_boarding': stop.get('wheelchair_boarding', '0')
             })
         else:
-            # for stops that are not in stations_platforms and that don't have a platform
-            # we still need to add a generic version with _0 suffix to match stop_times
-            if len(stop['stop_id'].split('_')) == 2:
-                stop['stop_id'] = f"{stop_id}_0"
+            if len(stop_id.split("_")) == 2:
+                stop['location_type'] = '1'  # indicate it's a station
+                # generic stop for trips where platforms are unknown, since the stop in stop_times must be of location_type 0
+                stops.insert(idx + 1,{
+                    'stop_id': f"{stop_id}_0",
+                    'stop_name': stop['stop_name'],
+                    'stop_lat': stop['stop_lat'],
+                    'stop_lon': stop['stop_lon'],
+                    'location_type': '0',
+                    'parent_station': stop_id,
+                    'wheelchair_boarding': stop.get('wheelchair_boarding', '0')
+                })
     
     # with open('enhanced_stops.txt', 'w', encoding='utf-8', newline='') as f:
     #     writer = csv.DictWriter(f, fieldnames=stops[0].keys())
@@ -176,6 +184,9 @@ def run():
                 if platform:
                     stop_id = stop_id.replace("-", "_")
                     stop_time['stop_id'] = f"{stop_id}_{platform}"
+                else:
+                    stop_id = stop_id.replace("-", "_")
+                    stop_time['stop_id'] = f"{stop_id}_0"
         else:
             stop_id = stop_id.replace("-", "_")
             stop_time['stop_id'] = f"{stop_id}_0"
