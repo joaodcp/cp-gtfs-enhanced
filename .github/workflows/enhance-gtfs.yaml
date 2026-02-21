@@ -40,6 +40,20 @@ jobs:
             - name: run pipeline
               run: python enhance.py
 
+            - name: download OSM data for Portugal
+              run: wget -q https://download.geofabrik.de/europe/portugal-latest.osm.pbf -O portugal.osm.pbf
+
+            - name: run pfaedle on GTFS
+              run: |
+                  mkdir -p gtfs-out
+                  docker run -i --rm \
+                    --volume ${{ github.workspace }}:/osm \
+                    --volume ${{ github.workspace }}/enhanced:/gtfs \
+                    --volume ${{ github.workspace }}/gtfs-out:/gtfs-out \
+                    ghcr.io/ad-freiburg/pfaedle:latest \
+                    -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_enhanced.zip
+                  mv gtfs-out/cp_gtfs_enhanced.zip enhanced/cp_gtfs_enhanced.zip
+
             - name: upload gtfs
               if: success()
               uses: actions/upload-artifact@v4

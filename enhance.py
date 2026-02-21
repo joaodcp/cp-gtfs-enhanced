@@ -176,29 +176,29 @@ def run():
             stop_time['stop_id'] = f"{stop_id}_0"
 
 
-    if is_gha:
-        trip_shapes = json.load(open('./preprocessed/trip_shapes.json', 'r'))
-        for trip in trips:
-            trip_short_name = trip['trip_short_name']
-            if trip_short_name in trip_shapes:
-                trip['shape_id'] = trip_shapes[trip_short_name]
-    else:
-        shapes_rows = []
-        for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
-            for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
-                shapes_rows.append({
-                    'shape_id': f'shp_{idx}',
-                    'shape_pt_lat': point[1],
-                    'shape_pt_lon': point[0],
-                    'shape_pt_sequence': pt_idx
-                })
+    # if is_gha:
+    #     trip_shapes = json.load(open('./preprocessed/trip_shapes.json', 'r'))
+    #     for trip in trips:
+    #         trip_short_name = trip['trip_short_name']
+    #         if trip_short_name in trip_shapes:
+    #             trip['shape_id'] = trip_shapes[trip_short_name]
+    # else:
+    #     shapes_rows = []
+    #     for idx, (shape_key, shape_data) in enumerate(keyed_shapes.items()):
+    #         for pt_idx, point in enumerate(shape_data['shape']['features'][0]['geometry']['coordinates']):
+    #             shapes_rows.append({
+    #                 'shape_id': f'shp_{idx}',
+    #                 'shape_pt_lat': point[1],
+    #                 'shape_pt_lon': point[0],
+    #                 'shape_pt_sequence': pt_idx
+    #             })
 
-        for trip in trips:
-            trip_short_name = trip['trip_short_name']
-            for shape_key, shape_data in keyed_shapes.items():
-                if trip_short_name in shape_data['trips']:
-                    trip['shape_id'] = f'shp_{list(keyed_shapes.keys()).index(shape_key)}'
-                    break   
+    #     for trip in trips:
+    #         trip_short_name = trip['trip_short_name']
+    #         for shape_key, shape_data in keyed_shapes.items():
+    #             if trip_short_name in shape_data['trips']:
+    #                 trip['shape_id'] = f'shp_{list(keyed_shapes.keys()).index(shape_key)}'
+    #                 break   
 
     # with open('enhanced_stop_times.txt', 'w', encoding='utf-8', newline='') as f:
     #     writer = csv.DictWriter(f, fieldnames=stop_times[0].keys())
@@ -246,24 +246,24 @@ def run():
         enhanced_zip.writestr('stop_times.txt', stop_times_output.getvalue())
         print("wrote enhanced stop_times.txt")
 
-        if is_gha:
-            with open('./preprocessed/shapes.txt', 'r', encoding='utf-8') as f:
-                enhanced_zip.writestr('shapes.txt', f.read())
-            print("wrote preprocessed shapes.txt")
-        else:
-            shapes_output = io.StringIO()
-            writer = csv.DictWriter(shapes_output, fieldnames=shapes_rows[0].keys())
-            writer.writeheader()
-            writer.writerows(shapes_rows)
-            enhanced_zip.writestr('shapes.txt', shapes_output.getvalue())
-            print("wrote enhanced shapes.txt")
-
-        trips_output = io.StringIO()
-        writer = csv.DictWriter(trips_output, fieldnames=trips[0].keys())
-        writer.writeheader()
-        writer.writerows(trips)
-        enhanced_zip.writestr('trips.txt', trips_output.getvalue())
-        print("wrote enhanced trips.txt")
+        # if is_gha:
+        #     with open('./preprocessed/shapes.txt', 'r', encoding='utf-8') as f:
+        #         enhanced_zip.writestr('shapes.txt', f.read())
+        #     print("wrote preprocessed shapes.txt")
+        # else:
+        #     shapes_output = io.StringIO()
+        #     writer = csv.DictWriter(shapes_output, fieldnames=shapes_rows[0].keys())
+        #     writer.writeheader()
+        #     writer.writerows(shapes_rows)
+        #     enhanced_zip.writestr('shapes.txt', shapes_output.getvalue())
+        #     print("wrote enhanced shapes.txt")
+        
+        # trips_output = io.StringIO()
+        # writer = csv.DictWriter(trips_output, fieldnames=trips[0].keys())
+        # writer.writeheader()
+        # writer.writerows(trips)
+        # enhanced_zip.writestr('trips.txt', trips_output.getvalue())
+        # print("wrote enhanced trips.txt")
 
         
         # Copy all other files from original GTFS unchanged
