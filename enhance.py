@@ -268,7 +268,7 @@ def run():
         
         # Copy all other files from original GTFS unchanged
         for file_info in gtfs_zip.filelist:
-            if file_info.filename not in ['stops.txt', 'stop_times.txt', 'shapes.txt', 'trips.txt']:
+            if file_info.filename not in ['stops.txt', 'stop_times.txt', 'shapes.txt']:
                 enhanced_zip.writestr(file_info.filename, gtfs_zip.read(file_info.filename))
                 print(f"copied {file_info.filename}")
     
