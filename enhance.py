@@ -157,8 +157,10 @@ def run():
                 'wheelchair_boarding': stop.get('wheelchair_boarding', '0')
             })
         else:
-            # for stops that are not in stations_platforms, we still need to add a generic version with _0 suffix to match stop_times
-            stop['stop_id'] = f"{stop_id}_0"
+            # for stops that are not in stations_platforms and that don't have a platform
+            # we still need to add a generic version with _0 suffix to match stop_times
+            if len(stop['stop_id'].split('_')) == 2:
+                stop['stop_id'] = f"{stop_id}_0"
     
     # with open('enhanced_stops.txt', 'w', encoding='utf-8', newline='') as f:
     #     writer = csv.DictWriter(f, fieldnames=stops[0].keys())
