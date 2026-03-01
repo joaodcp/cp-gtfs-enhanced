@@ -176,6 +176,9 @@ def run():
     #     writer.writerows(stops)
 
     for idx, stop_time in enumerate(stop_times):
+        stop_time['arrival_time'] = normalize_gtfs_time(stop_time['arrival_time']
+        stop_time['departure_time'] = normalize_gtfs_time(stop_time['departure_time']
+        
         stop_id = stop_time['stop_id'].replace("_", "-")
         trip_short_name = stop_time['trip_id'].split('_')[0]
         if trip_short_name in trips_platforms:
