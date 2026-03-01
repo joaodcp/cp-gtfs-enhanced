@@ -6,7 +6,7 @@ import csv
 import json
 import os
 from datetime import datetime
-from utils import normalize_gtfs_time
+from utils.time import normalize_gtfs_time
 
 is_gha = os.getenv("GITHUB_ACTIONS") == "true"
 
