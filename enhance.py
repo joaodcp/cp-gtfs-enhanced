@@ -6,6 +6,7 @@ import csv
 import json
 import os
 from datetime import datetime
+from utils import normalize_gtfs_time
 
 is_gha = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -176,8 +177,8 @@ def run():
     #     writer.writerows(stops)
 
     for idx, stop_time in enumerate(stop_times):
-        stop_time['arrival_time'] = normalize_gtfs_time(stop_time['arrival_time']
-        stop_time['departure_time'] = normalize_gtfs_time(stop_time['departure_time']
+        stop_time['arrival_time'] = normalize_gtfs_time(stop_time['arrival_time'])
+        stop_time['departure_time'] = normalize_gtfs_time(stop_time['departure_time'])
         
         stop_id = stop_time['stop_id'].replace("_", "-")
         trip_short_name = stop_time['trip_id'].split('_')[0]
