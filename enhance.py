@@ -13,8 +13,13 @@ is_gha = os.getenv("GITHUB_ACTIONS") == "true"
 GTFS_URL = "https://publico.cp.pt/gtfs/gtfs.zip"
 OUTPUT_DIR = "./enhanced"
 CP_GIS_API_URL = "https://api-gateway.cp.pt/cp/services/gis-api/train-path/{trip_short_name}"
+GTFS_ZIP_PATH = os.getenv("GTFS_ZIP_PATH")
 
 def get_gtfs_zip():
+    if GTFS_ZIP_PATH and os.path.exists(GTFS_ZIP_PATH):
+        print(f"Using local GTFS zip: {GTFS_ZIP_PATH}")
+        return zipfile.ZipFile(GTFS_ZIP_PATH, 'r')
+
     response = requests.get(GTFS_URL, stream=True, timeout=30)
     response.raise_for_status()
     return zipfile.ZipFile(io.BytesIO(response.content))

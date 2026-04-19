@@ -37,22 +37,41 @@ jobs:
             - name: install deps
               run: pip install -r requirements.txt
 
+            - name: download original GTFS
+              run: |
+                  mkdir -p original
+                  wget -q https://publico.cp.pt/gtfs/gtfs.zip -O original/cp_gtfs_original.zip
+
             - name: run pipeline
+              env:
+                  GTFS_ZIP_PATH: original/cp_gtfs_original.zip
               run: python enhance.py
 
             - name: download OSM data for Portugal
               run: wget -q https://download.geofabrik.de/europe/portugal-latest.osm.pbf -O portugal.osm.pbf
 
-            - name: run pfaedle on GTFS
+            - name: run pfaedle on enhanced and original GTFS
               run: |
-                  mkdir -p gtfs-out
+                  mkdir -p gtfs-out-enhanced gtfs-out-original
+
                   docker run -i --rm \
                     --volume ${{ github.workspace }}:/osm \
                     --volume ${{ github.workspace }}/enhanced:/gtfs \
-                    --volume ${{ github.workspace }}/gtfs-out:/gtfs-out \
+                    --volume ${{ github.workspace }}/gtfs-out-enhanced:/gtfs-out \
                     ghcr.io/ad-freiburg/pfaedle:latest \
                     -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_enhanced.zip
-                  cd gtfs-out && zip -r ../enhanced/cp_gtfs_enhanced.zip *.txt
+
+                  cd gtfs-out-enhanced && zip -r ../enhanced/cp_gtfs_enhanced.zip *.txt
+                  cd ..
+
+                  docker run -i --rm \
+                    --volume ${{ github.workspace }}:/osm \
+                    --volume ${{ github.workspace }}/original:/gtfs \
+                    --volume ${{ github.workspace }}/gtfs-out-original:/gtfs-out \
+                    ghcr.io/ad-freiburg/pfaedle:latest \
+                    -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_original.zip
+
+                  cd gtfs-out-original && zip -r ../enhanced/cp_gtfs_pfaedled.zip *.txt
 
             - name: upload gtfs
               if: success()
