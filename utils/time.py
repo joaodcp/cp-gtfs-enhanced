@@ -1,3 +1,4 @@
+from datetime import datetime
 import re
 
 def normalize_gtfs_time(s: str) -> str:
@@ -18,3 +19,7 @@ def normalize_gtfs_time(s: str) -> str:
         mins %= 60
 
     return f"{hours:02d}:{mins:02d}:{secs:02d}"
+
+def get_gtfs_time_from_utc_millis(utc_millis: int) -> str:
+    dt = datetime.fromtimestamp(utc_millis / 1000)
+    return dt.strftime("%H:%M:%S")
