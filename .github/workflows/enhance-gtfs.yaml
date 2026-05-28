@@ -60,6 +60,11 @@ jobs:
                   CP_GIS_API_KEY: ${{ secrets.CP_GIS_API_KEY }}
                   CP_GIS_CONNECT_ID: ${{ secrets.CP_GIS_CONNECT_ID }}
                   CP_GIS_CONNECT_SECRET: ${{ secrets.CP_GIS_CONNECT_SECRET }}
+
+                  # adif api
+                  ADIF_ACCESS_KEY: ${{ secrets.ADIF_ACCESS_KEY }}
+                  ADIF_SECRET_KEY: ${{ secrets.ADIF_SECRET_KEY }}
+                  ADIF_CIRCULATION_USER_KEY: ${{ secrets.ADIF_CIRCULATION_USER_KEY }}
               run: python enhance.py
 
             - name: download OSM data for Portugal

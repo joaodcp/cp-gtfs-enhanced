@@ -101,7 +101,7 @@ def get_headers(
         "X-Elcano-Date": timestamp,
         "X-Elcano-UserId": user_id,
         "Authorization": authorization,
-        "User-key": os.getenv("ADIF_USER_KEY"),
+        "User-key": os.getenv("ADIF_CIRCULATION_USER_KEY"),
     }
 
 
