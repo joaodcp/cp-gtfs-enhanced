@@ -456,7 +456,7 @@ def run():
         overrides={
             "stops.txt": stops,
             "stop_times.txt": stop_times,
-            # then we'll shapes/trips if re-enabled later
+            # then we'll add back shapes/trips if re-enabled later
         }
     )
     
