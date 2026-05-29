@@ -126,6 +126,48 @@ def enhance_stops(stops_txt):
     return '\n'.join(new_lines)
 
 
+def write_gtfs_zip(
+    output_dir: str,
+    output_filename: str,
+    gtfs_zip: zipfile.ZipFile,
+    overrides: dict,  # {"stops.txt": stops, "stop_times.txt": stop_times}
+    skip_files=None
+):
+    skip_files = set(skip_files or [])
+
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, output_filename)
+
+    print(f"creating gtfs package at {output_path}...")
+
+    with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as out_zip:
+
+        # write overridden tables
+        for filename, rows in overrides.items():
+            if not rows:
+                continue
+
+            buffer = io.StringIO()
+            writer = csv.DictWriter(buffer, fieldnames=rows[0].keys())
+            writer.writeheader()
+            writer.writerows(rows)
+
+            out_zip.writestr(filename, buffer.getvalue())
+            print(f"wrote {filename}")
+
+        # copy everything else
+        for file_info in gtfs_zip.filelist:
+            name = file_info.filename
+
+            if name in overrides or name in skip_files:
+                continue
+
+            out_zip.writestr(name, gtfs_zip.read(name))
+            print(f"copied {name}")
+
+    return output_path
+
+
 tz = ZoneInfo("Europe/Madrid")
 today = datetime.now(tz).date()
 
@@ -195,7 +237,6 @@ def run():
                 adif_next_circulation['passthroughSteps'][len_before - 1]['arrivalPassthroughStepSides']['plannedPlatform'] = '5' 
 
 
-
             stations_platforms[spanish_station_id] = set()
             for step in adif_next_circulation["passthroughSteps"]:
                 if step["stationCode"] == spanish_station_id[3:]:
@@ -253,7 +294,18 @@ def run():
                     #         if stop_time['trip_id'] == trip['trip_id']:
                     #             stop_time['stop_sequence'] = str(int(stop_time['stop_sequence']) + 1)
                     break
-            
+
+    output_path_international = write_gtfs_zip(
+        OUTPUT_DIR,
+        "cp_gtfs_international.zip",
+        gtfs_zip,
+        overrides={
+            "stops.txt": stops,
+            "stop_times.txt": stop_times,
+        }
+    )
+
+    print(f"international gtfs saved to: {output_path_international}")
 
     MAX_TRIPS = 30
     # all_trips_details = get_trip_details([int(trip['trip_short_name']) for trip in trips[:MAX_TRIPS]])
@@ -396,58 +448,18 @@ def run():
     #     print(f"  {line}")
     
     # return enhanced_stops
-
-
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    output_filename = f"cp_gtfs_enhanced.zip"
-    output_path = os.path.join(OUTPUT_DIR, output_filename)
-    
-    print(f"creating enhanced gtfs package at {output_path}...")
-    
-    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as enhanced_zip:
-        stops_output = io.StringIO()
-        writer = csv.DictWriter(stops_output, fieldnames=stops[0].keys())
-        writer.writeheader()
-        writer.writerows(stops)
-        enhanced_zip.writestr('stops.txt', stops_output.getvalue())
-        print("wrote enhanced stops.txt")
-        
-        stop_times_output = io.StringIO()
-        writer = csv.DictWriter(stop_times_output, fieldnames=stop_times[0].keys())
-        writer.writeheader()
-        writer.writerows(stop_times)
-        enhanced_zip.writestr('stop_times.txt', stop_times_output.getvalue())
-        print("wrote enhanced stop_times.txt")
-
-        # if is_gha:
-        #     with open('./preprocessed/shapes.txt', 'r', encoding='utf-8') as f:
-        #         enhanced_zip.writestr('shapes.txt', f.read())
-        #     print("wrote preprocessed shapes.txt")
-        # else:
-        #     shapes_output = io.StringIO()
-        #     writer = csv.DictWriter(shapes_output, fieldnames=shapes_rows[0].keys())
-        #     writer.writeheader()
-        #     writer.writerows(shapes_rows)
-        #     enhanced_zip.writestr('shapes.txt', shapes_output.getvalue())
-        #     print("wrote enhanced shapes.txt")
-        
-        # trips_output = io.StringIO()
-        # writer = csv.DictWriter(trips_output, fieldnames=trips[0].keys())
-        # writer.writeheader()
-        # writer.writerows(trips)
-        # enhanced_zip.writestr('trips.txt', trips_output.getvalue())
-        # print("wrote enhanced trips.txt")
-
-        
-        # Copy all other files from original GTFS unchanged
-        for file_info in gtfs_zip.filelist:
-            if file_info.filename not in ['stops.txt', 'stop_times.txt', 'shapes.txt']:
-                enhanced_zip.writestr(file_info.filename, gtfs_zip.read(file_info.filename))
-                print(f"copied {file_info.filename}")
+    output_path = write_gtfs_zip(
+        OUTPUT_DIR,
+        "cp_gtfs_enhanced.zip",
+        gtfs_zip,
+        overrides={
+            "stops.txt": stops,
+            "stop_times.txt": stop_times,
+            # then we'll shapes/trips if re-enabled later
+        }
+    )
     
     print(f"enhanced gtfs saved to: {output_path}")
-    return output_path
 
 run()

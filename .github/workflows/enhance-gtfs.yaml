@@ -70,9 +70,9 @@ jobs:
             - name: download OSM data for Portugal
               run: wget -q https://download.geofabrik.de/europe/portugal-latest.osm.pbf -O portugal.osm.pbf
 
-            - name: run pfaedle on enhanced and original GTFS
+            - name: run pfaedle on enhanced, international and original GTFS
               run: |
-                  mkdir -p gtfs-out-enhanced gtfs-out-original
+                  mkdir -p gtfs-out-enhanced gtfs-out-international gtfs-out-original
 
                   docker run -i --rm \
                     --volume ${{ github.workspace }}:/osm \
@@ -82,6 +82,16 @@ jobs:
                     -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_enhanced.zip
 
                   cd gtfs-out-enhanced && zip -r ../enhanced/cp_gtfs_enhanced.zip *.txt
+                  cd ..
+
+                  docker run -i --rm \
+                    --volume ${{ github.workspace }}:/osm \
+                    --volume ${{ github.workspace }}/enhanced:/gtfs \
+                    --volume ${{ github.workspace }}/gtfs-out-international:/gtfs-out \
+                    ghcr.io/ad-freiburg/pfaedle:latest \
+                    -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_international.zip
+
+                  cd gtfs-out-international && zip -r ../enhanced/cp_gtfs_international.zip *.txt
                   cd ..
 
                   docker run -i --rm \
