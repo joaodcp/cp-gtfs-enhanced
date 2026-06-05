@@ -53,7 +53,8 @@ def get_station_arrivals(station_id, date, start_time):
         headers={
             'x-api-key': os.getenv("CP_TRAVEL_API_KEY"),
             'x-cp-connect-id': os.getenv("CP_TRAVEL_CONNECT_ID"),
-            'x-cp-connect-secret': os.getenv("CP_TRAVEL_CONNECT_SECRET")
+            'x-cp-connect-secret': os.getenv("CP_TRAVEL_CONNECT_SECRET"),
+            'User-Agent': os.getenv("USER_AGENT", "cp-gtfs-enhanced/1.0")
         }
     )
     res.raise_for_status()
@@ -67,7 +68,8 @@ def get_trip_details(trip_ids):
         headers={
             'x-api-key': os.getenv("CP_REALTIME_API_KEY"),
             'x-cp-connect-id': os.getenv("CP_REALTIME_CONNECT_ID"),
-            'x-cp-connect-secret': os.getenv("CP_REALTIME_CONNECT_SECRET")
+            'x-cp-connect-secret': os.getenv("CP_REALTIME_CONNECT_SECRET"),
+            'User-Agent': os.getenv("USER_AGENT", "cp-gtfs-enhanced/1.0")
         }
     )
     res.raise_for_status()
@@ -80,7 +82,8 @@ def get_planned_trip_details(train_number, date = datetime.now().strftime("%Y-%m
         headers={
             'x-api-key': os.getenv("CP_TRAVEL_API_KEY"),
             'x-cp-connect-id': os.getenv("CP_TRAVEL_CONNECT_ID"),
-            'x-cp-connect-secret': os.getenv("CP_TRAVEL_CONNECT_SECRET")
+            'x-cp-connect-secret': os.getenv("CP_TRAVEL_CONNECT_SECRET"),
+            'User-Agent': os.getenv("USER_AGENT", "cp-gtfs-enhanced/1.0")
         }
     )
     res.raise_for_status()
@@ -93,7 +96,8 @@ def get_trip_shape(trip_id, max_retries=3):
             res = requests.get(CP_GIS_API_URL.format(trip_short_name=trip_id), headers={
                 'x-api-key': os.getenv("CP_GIS_API_KEY"),
                 'x-cp-connect-id': os.getenv("CP_GIS_CONNECT_ID"),
-                'x-cp-connect-secret': os.getenv("CP_GIS_CONNECT_SECRET")
+                'x-cp-connect-secret': os.getenv("CP_GIS_CONNECT_SECRET"),
+                'User-Agent': os.getenv("USER_AGENT", "cp-gtfs-enhanced/1.0")
             }, timeout=30)
             if res.status_code != 200:
                 return None

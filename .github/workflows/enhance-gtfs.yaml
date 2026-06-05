@@ -49,6 +49,7 @@ jobs:
             - name: run pipeline
               env:
                   GTFS_ZIP_PATH: original/cp_gtfs_original.zip
+                  USER_AGENT: ${{ secrets.USER_AGENT }}
 
                   # travel api
                   CP_TRAVEL_API_KEY: ${{ secrets.CP_TRAVEL_API_KEY }}
