@@ -267,7 +267,7 @@ def run():
                 adif_next_circulation['passthroughSteps'][len_before - 1]['stationCode'] = spanish_station_id[3:]
                 adif_next_circulation['passthroughSteps'][len_before - 1]['stopType'] = 'COMMERCIAL'
                 # hardcoded 5 since that seems to be the usual for now
-                adif_next_circulation['passthroughSteps'][len_before - 1]['arrivalPassthroughStepSides']['plannedPlatform'] = '5' 
+                adif_next_circulation['passthroughSteps'][len_before - 1]['arrivalPassthroughStepSides']['plannedPlatform'] = stations_platforms.get(spanish_station_id, {5}).pop()
 
 
             stations_platforms[spanish_station_id] = set()
