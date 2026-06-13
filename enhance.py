@@ -7,6 +7,7 @@ import csv
 import json
 import os
 from datetime import date, datetime
+from grouping.group import get_grouped_gtfs
 from utils.time import normalize_gtfs_time, get_gtfs_time_from_utc_millis
 from services.adif import get_adif_arrivals, get_adif_circulation
 
@@ -208,9 +209,18 @@ def run():
 
     # add missing route colors
     for route in routes:
-        new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])
+        new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])[1:] if route['route_short_name'] in MISSING_ROUTE_SERVICE_COLORS else None
         route['route_color'] = new_color if new_color else 'FFFFFF'
         route['route_text_color'] = 'FFFFFF' if new_color else '000000'
+
+    grouped_gtfs = get_grouped_gtfs(
+        {
+            "routes": routes,
+            "stops": stops,
+            "trips": trips,
+            "stop_times": stop_times
+        }
+    )
 
     # process international trips to add missing border stations and platforms based on ADIF circulation data
     international_trips_spain = []
@@ -486,5 +496,17 @@ def run():
     )
     
     print(f"enhanced gtfs saved to: {output_path}")
+
+    output_path_grouped = write_gtfs_zip(
+        OUTPUT_DIR,
+        "cp_gtfs_grouped.zip",
+        gtfs_zip,
+        overrides={
+            "routes.txt": grouped_gtfs["routes"],
+            "trips.txt": grouped_gtfs["trips"],
+        }
+    )
+
+    print(f"grouped gtfs saved to: {output_path_grouped}")
 
 run()

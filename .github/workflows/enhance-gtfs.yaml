@@ -101,6 +101,16 @@ jobs:
 
                   docker run -i --rm \
                     --volume ${{ github.workspace }}:/osm \
+                    --volume ${{ github.workspace }}/enhanced:/gtfs \
+                    --volume ${{ github.workspace }}/gtfs-out-grouped:/gtfs-out \
+                    ghcr.io/ad-freiburg/pfaedle:latest \
+                    -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_grouped.zip
+
+                  cd gtfs-out-grouped && zip -r ../enhanced/cp_gtfs_grouped.zip *.txt
+                  cd ..
+
+                  docker run -i --rm \
+                    --volume ${{ github.workspace }}:/osm \
                     --volume ${{ github.workspace }}/original:/gtfs \
                     --volume ${{ github.workspace }}/gtfs-out-original:/gtfs-out \
                     ghcr.io/ad-freiburg/pfaedle:latest \
