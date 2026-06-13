@@ -1,5 +1,7 @@
 import copy
 
+from utils.names import get_fixed_name
+
 PREFER_BA_STOPS_FOR_ROUTE_LONG_NAME = True
 
 LINE_LONG_NAME_REPLACES = {
@@ -30,7 +32,7 @@ def normalize_line_name(name):
 
     for p in ("Linha de ", "Linha da ", "Linha do "):
         if name.startswith(p):
-            return name.replace(p, "")
+            return get_fixed_name(name.replace(p, ""))
     return name
 
 

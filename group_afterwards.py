@@ -4,6 +4,8 @@ import os
 import csv
 import io
 
+from utils.names import get_fixed_name
+
 
 OUTPUT_DIR = "./enhanced"
 ORIGINAL_GTFS_ZIP_PATH = os.getenv("GTFS_ZIP_PATH")
@@ -37,6 +39,9 @@ for route in routes:
     new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])[1:] if route['route_short_name'] in MISSING_ROUTE_SERVICE_COLORS else None
     route['route_color'] = new_color if new_color else 'FFFFFF'
     route['route_text_color'] = 'FFFFFF' if new_color else '000000'
+
+for stop in stops:
+    stop['stop_name'] = get_fixed_name(stop['stop_name'])
 
 grouped_gtfs = get_grouped_gtfs(
     {
