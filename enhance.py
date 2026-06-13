@@ -10,6 +10,7 @@ from datetime import date, datetime
 from grouping.group import get_grouped_gtfs
 from utils.time import normalize_gtfs_time, get_gtfs_time_from_utc_millis
 from services.adif import get_adif_arrivals, get_adif_circulation
+from utils.gtfsio import write_gtfs_zip, get_gtfs_zip
 
 is_gha = os.getenv("GITHUB_ACTIONS") == "true"
 
@@ -47,15 +48,6 @@ MISSING_ROUTE_SERVICE_COLORS = {
     'U': '#4e98d1',
     'IN': '#702351'
 }
-
-def get_gtfs_zip():
-    if GTFS_ZIP_PATH and os.path.exists(GTFS_ZIP_PATH):
-        print(f"Using local GTFS zip: {GTFS_ZIP_PATH}")
-        return zipfile.ZipFile(GTFS_ZIP_PATH, 'r')
-
-    response = requests.get(GTFS_URL, stream=True, timeout=30)
-    response.raise_for_status()
-    return zipfile.ZipFile(io.BytesIO(response.content))
 
 def get_station_arrivals(station_id, date, start_time):
     res = requests.get(
@@ -140,54 +132,12 @@ def enhance_stops(stops_txt):
     return '\n'.join(new_lines)
 
 
-def write_gtfs_zip(
-    output_dir: str,
-    output_filename: str,
-    gtfs_zip: zipfile.ZipFile,
-    overrides: dict,  # {"stops.txt": stops, "stop_times.txt": stop_times}
-    skip_files=None
-):
-    skip_files = set(skip_files or [])
-
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, output_filename)
-
-    print(f"creating gtfs package at {output_path}...")
-
-    with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as out_zip:
-
-        # write overridden tables
-        for filename, rows in overrides.items():
-            if not rows:
-                continue
-
-            buffer = io.StringIO()
-            writer = csv.DictWriter(buffer, fieldnames=rows[0].keys())
-            writer.writeheader()
-            writer.writerows(rows)
-
-            out_zip.writestr(filename, buffer.getvalue())
-            print(f"wrote {filename}")
-
-        # copy everything else
-        for file_info in gtfs_zip.filelist:
-            name = file_info.filename
-
-            if name in overrides or name in skip_files:
-                continue
-
-            out_zip.writestr(name, gtfs_zip.read(name))
-            print(f"copied {name}")
-
-    return output_path
-
-
 tz = ZoneInfo("Europe/Madrid")
 today = datetime.now(tz).date()
 
 def run():
     print("Downloading GTFS feed...")
-    gtfs_zip = get_gtfs_zip()
+    gtfs_zip = get_gtfs_zip(GTFS_ZIP_PATH, GTFS_URL)
 
     stops_txt = gtfs_zip.read('stops.txt').decode('utf-8')
     stops = list(csv.DictReader(io.StringIO(stops_txt)))
@@ -496,17 +446,5 @@ def run():
     )
     
     print(f"enhanced gtfs saved to: {output_path}")
-
-    output_path_grouped = write_gtfs_zip(
-        OUTPUT_DIR,
-        "cp_gtfs_grouped.zip",
-        gtfs_zip,
-        overrides={
-            "routes.txt": grouped_gtfs["routes"],
-            "trips.txt": grouped_gtfs["trips"],
-        }
-    )
-
-    print(f"grouped gtfs saved to: {output_path_grouped}")
 
 run()

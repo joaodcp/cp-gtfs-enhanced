@@ -49,6 +49,7 @@ jobs:
             - name: run pipeline
               env:
                   GTFS_ZIP_PATH: original/cp_gtfs_original.zip
+                  GTFS_TO_GROUP_PATH: enhanced/cp_gtfs_pfaedled.zip
                   USER_AGENT: ${{ secrets.USER_AGENT }}
 
                   # travel api
@@ -117,6 +118,11 @@ jobs:
                     -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_original.zip
 
                   cd gtfs-out-original && zip -r ../enhanced/cp_gtfs_pfaedled.zip *.txt
+            
+            - name: run grouping pipeline
+              env:
+                  GTFS_TO_GROUP_PATH: enhanced/cp_gtfs_pfaedled.zip
+              run: python group_afterwards.py
 
             - name: upload gtfs
               if: success()
