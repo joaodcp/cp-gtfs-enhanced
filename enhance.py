@@ -163,15 +163,6 @@ def run():
         route['route_color'] = new_color if new_color else 'FFFFFF'
         route['route_text_color'] = 'FFFFFF' if new_color else '000000'
 
-    grouped_gtfs = get_grouped_gtfs(
-        {
-            "routes": routes,
-            "stops": stops,
-            "trips": trips,
-            "stop_times": stop_times
-        }
-    )
-
     # process international trips to add missing border stations and platforms based on ADIF circulation data
     international_trips_spain = []
     for trip in trips:

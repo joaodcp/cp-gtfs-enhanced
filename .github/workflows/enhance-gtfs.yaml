@@ -111,6 +111,7 @@ jobs:
             - name: run grouping pipeline
               env:
                   GTFS_TO_GROUP_ZIP_PATH: enhanced/cp_gtfs_pfaedled.zip
+                  GTFS_ZIP_PATH: original/cp_gtfs_original.zip
               run: python group_afterwards.py
 
             - name: upload gtfs
