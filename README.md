@@ -13,7 +13,7 @@ You can add the query param `?includes=platforms` to use the realtime feed with 
 ## Feeds
 Three feeds are generated every day:
 
-### [cp_gtfs_enhanced.zip](releases/latest/download/cp_gtfs_enhanced.zip)
+### [cp_gtfs_enhanced.zip](https://github.com/joaodcp/cp-gtfs-enhanced/releases/latest/download/cp_gtfs_enhanced.zip)
 This feed is the one that includes all improvements.
 
 Includes:
@@ -22,7 +22,7 @@ Includes:
 - Spanish station information (Badajoz, Vigo-Guixar)
 - Fixed stop names (diacritics, formatting, etc.)
 
-### [cp_gtfs_international.zip](releases/latest/download/cp_gtfs_international.zip)
+### [cp_gtfs_international.zip](https://github.com/joaodcp/cp-gtfs-enhanced/releases/latest/download/cp_gtfs_international.zip)
 This feed includes all improvements except the platform codes.
 
 Includes:
@@ -30,7 +30,7 @@ Includes:
 - Spanish station information (Badajoz, Vigo-Guixar)
 - Fixed stop names (diacritics, formatting, etc.)
 
-### [cp_gtfs_grouped.zip](releases/latest/download/cp_gtfs_grouped.zip)
+### [cp_gtfs_grouped.zip](https://github.com/joaodcp/cp-gtfs-enhanced/releases/latest/download/cp_gtfs_grouped.zip)
 This feed is very different from the original and should used for presentation in apps where a line list is used.
 
 Includes:
@@ -60,7 +60,7 @@ line_long_name: Barreiro - Praias do Sado-A
     └── pattern_id: SADO_1_1 (Praias do Sado-A to Barreiro)
 ```
 
-### [cp_gtfs_pfaedled.zip](releases/latest/download/cp_gtfs_pfaedled.zip)
+### [cp_gtfs_pfaedled.zip](https://github.com/joaodcp/cp-gtfs-enhanced/releases/latest/download/cp_gtfs_pfaedled.zip)
 Most of this feed is untouched and is mostly for comparison purposes with the original one.<br>
 It only includes the shapes.
 
