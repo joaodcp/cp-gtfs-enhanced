@@ -3,6 +3,8 @@ from grouping.group import get_grouped_gtfs
 import os
 import csv
 import io
+from enhance import MISSING_ROUTE_SERVICE_COLORS
+
 
 OUTPUT_DIR = "./enhanced"
 ORIGINAL_GTFS_ZIP_PATH = os.getenv("GTFS_ZIP_PATH")
@@ -22,6 +24,11 @@ trips = list(csv.DictReader(io.StringIO(trips_txt)))
 
 stop_times_txt = gtfs_zip.read('stop_times.txt').decode('utf-8')
 stop_times = list(csv.DictReader(io.StringIO(stop_times_txt)))
+
+for route in routes:
+    new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])[1:] if route['route_short_name'] in MISSING_ROUTE_SERVICE_COLORS else None
+    route['route_color'] = new_color if new_color else 'FFFFFF'
+    route['route_text_color'] = 'FFFFFF' if new_color else '000000'
 
 grouped_gtfs = get_grouped_gtfs(
     {
