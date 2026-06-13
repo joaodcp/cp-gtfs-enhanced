@@ -3,12 +3,20 @@ from grouping.group import get_grouped_gtfs
 import os
 import csv
 import io
-from enhance import MISSING_ROUTE_SERVICE_COLORS
 
 
 OUTPUT_DIR = "./enhanced"
 ORIGINAL_GTFS_ZIP_PATH = os.getenv("GTFS_ZIP_PATH")
 GTFS_ZIP_PATH = os.getenv("GTFS_TO_GROUP_ZIP_PATH")
+
+MISSING_ROUTE_SERVICE_COLORS = {
+    'AP': '#7b9a40',
+    'IC': '#33703c',
+    'IR': '#3c70b3',
+    'R': '#de833c',
+    'U': '#4e98d1',
+    'IN': '#702351'
+}
 
 original_gtfs_zip = get_gtfs_zip(ORIGINAL_GTFS_ZIP_PATH, None)
 gtfs_zip = get_gtfs_zip(GTFS_ZIP_PATH, None)
