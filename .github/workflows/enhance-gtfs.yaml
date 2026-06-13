@@ -49,7 +49,6 @@ jobs:
             - name: run pipeline
               env:
                   GTFS_ZIP_PATH: original/cp_gtfs_original.zip
-                  GTFS_TO_GROUP_PATH: enhanced/cp_gtfs_pfaedled.zip
                   USER_AGENT: ${{ secrets.USER_AGENT }}
 
                   # travel api
@@ -98,16 +97,6 @@ jobs:
                     -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_international.zip
 
                   cd gtfs-out-international && zip -r ../enhanced/cp_gtfs_international.zip *.txt
-                  cd ..
-
-                  docker run -i --rm \
-                    --volume ${{ github.workspace }}:/osm \
-                    --volume ${{ github.workspace }}/enhanced:/gtfs \
-                    --volume ${{ github.workspace }}/gtfs-out-grouped:/gtfs-out \
-                    ghcr.io/ad-freiburg/pfaedle:latest \
-                    -D -x /osm/portugal.osm.pbf -i /gtfs/cp_gtfs_grouped.zip
-
-                  cd gtfs-out-grouped && zip -r ../enhanced/cp_gtfs_grouped.zip *.txt
                   cd ..
 
                   docker run -i --rm \
