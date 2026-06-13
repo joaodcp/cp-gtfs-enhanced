@@ -59,6 +59,7 @@ output_path_grouped = write_gtfs_zip(
     overrides={
         "routes.txt": grouped_gtfs["routes"],
         "trips.txt": grouped_gtfs["trips"],
+        "stops.txt": stops
     }
 )
 
