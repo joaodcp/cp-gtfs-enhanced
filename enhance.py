@@ -38,6 +38,15 @@ MISSING_INTERNATIONAL_STOPS = [
     }
 ]
 
+MISSING_ROUTE_SERVICE_COLORS = {
+    'AP': '#7b9a40',
+    'IC': '#33703c',
+    'IR': '#3c70b3',
+    'R': '#de833c',
+    'U': '#4e98d1',
+    'IN': '#702351'
+}
+
 def get_gtfs_zip():
     if GTFS_ZIP_PATH and os.path.exists(GTFS_ZIP_PATH):
         print(f"Using local GTFS zip: {GTFS_ZIP_PATH}")
@@ -189,11 +198,21 @@ def run():
     stop_times_txt = gtfs_zip.read('stop_times.txt').decode('utf-8')
     stop_times = list(csv.DictReader(io.StringIO(stop_times_txt)))
 
+    routes_txt = gtfs_zip.read('routes.txt').decode('utf-8')
+    routes = list(csv.DictReader(io.StringIO(routes_txt)))
+
     stations_platforms = {}
     trips_platforms = {}
     # Dict keyed by shape JSON string -> {'trips': [...], 'shape': shape_data}
     keyed_shapes = {}
 
+    # add missing route colors
+    for route in routes:
+        new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])
+        route['route_color'] = new_color if new_color else 'FFFFFF'
+        route['route_text_color'] = 'FFFFFF' if new_color else '000000'
+
+    # process international trips to add missing border stations and platforms based on ADIF circulation data
     international_trips_spain = []
     for trip in trips:
         [_, origin_stop_id, destination_stop_id] = trip["route_id"].split("-")
@@ -304,6 +323,7 @@ def run():
         "cp_gtfs_international.zip",
         gtfs_zip,
         overrides={
+            "routes.txt": routes,
             "stops.txt": stops,
             "stop_times.txt": stop_times,
         }
@@ -458,6 +478,7 @@ def run():
         "cp_gtfs_enhanced.zip",
         gtfs_zip,
         overrides={
+            "routes.txt": routes,
             "stops.txt": stops,
             "stop_times.txt": stop_times,
             # then we'll add back shapes/trips if re-enabled later
