@@ -5,7 +5,7 @@ import os
 OUTPUT_DIR = "./enhanced"
 GTFS_ZIP_PATH = os.getenv("GTFS_TO_GROUP_ZIP_PATH")
 
-gtfs_zip = get_gtfs_zip(GTFS_ZIP_PATH)
+gtfs_zip = get_gtfs_zip(GTFS_ZIP_PATH, None)
 
 grouped_gtfs = get_grouped_gtfs(gtfs_zip)
 
