@@ -1,4 +1,5 @@
 import copy
+from datetime import datetime
 
 from utils.names import get_fixed_name
 
@@ -285,5 +286,15 @@ def get_grouped_gtfs(feed):
             trip["direction_id"] = int(
                 trip["pattern_id"].rsplit("_", 1)[1]
             )
+
+    # ----------------------------
+    # add feed info
+    # ----------------------------
+    feed["feed_info"] = [{
+        "feed_publisher_name": "CP - Comboios de Portugal; joaodcp",
+        "feed_publisher_url": "https://github.com/joaodcp/cp-gtfs-enhanced",
+        "feed_lang": "pt",
+        "feed_version": datetime.now().strftime("%Y-%m-%d"),
+    }]
 
     return feed
