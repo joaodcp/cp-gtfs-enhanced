@@ -10,6 +10,7 @@ from utils.names import get_fixed_name
 OUTPUT_DIR = "./enhanced"
 ORIGINAL_GTFS_ZIP_PATH = os.getenv("GTFS_ZIP_PATH")
 GTFS_ZIP_PATH = os.getenv("GTFS_TO_GROUP_ZIP_PATH")
+NEW_AGENCY_ID = '3'
 
 MISSING_ROUTE_SERVICE_COLORS = {
     'AP': '#7b9a40',
@@ -22,6 +23,9 @@ MISSING_ROUTE_SERVICE_COLORS = {
 
 original_gtfs_zip = get_gtfs_zip(ORIGINAL_GTFS_ZIP_PATH, None)
 gtfs_zip = get_gtfs_zip(GTFS_ZIP_PATH, None)
+
+agency_txt = original_gtfs_zip.read('agency.txt').decode('utf-8')
+agency = list(csv.DictReader(io.StringIO(agency_txt)))
 
 routes_txt = original_gtfs_zip.read('routes.txt').decode('utf-8')
 routes = list(csv.DictReader(io.StringIO(routes_txt)))
@@ -39,6 +43,9 @@ for route in routes:
     new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])[1:] if route['route_short_name'] in MISSING_ROUTE_SERVICE_COLORS else None
     route['route_color'] = new_color if new_color else 'FFFFFF'
     route['route_text_color'] = 'FFFFFF' if new_color else '000000'
+    route['agency_id'] = NEW_AGENCY_ID
+
+agency[0]['agency_id'] = NEW_AGENCY_ID
 
 for stop in stops:
     stop['stop_name'] = get_fixed_name(stop['stop_name'])
@@ -57,6 +64,7 @@ output_path_grouped = write_gtfs_zip(
     "cp_gtfs_grouped.zip",
     gtfs_zip,
     overrides={
+        "agency.txt": agency,
         "routes.txt": grouped_gtfs["routes"],
         "trips.txt": grouped_gtfs["trips"],
         "stops.txt": stops,
