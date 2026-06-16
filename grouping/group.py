@@ -258,7 +258,9 @@ def get_grouped_gtfs(feed, agency_id_replace="3"):
                 "route_id": f"{line_id_upper}_{variant_index}",
                 "route_short_name": line_short_name,
                 "route_long_name": route_long_name,
-                "route_type": rep_route.get("route_type", "2"),
+                # some routes have route_type 109 on the origina feed ?????? wtf
+                # "route_type": rep_route.get("route_type", "2"),
+                "route_type": "2",
                 "route_color": rep_route.get("route_color", "FFFFFF"),
                 "route_text_color": rep_route.get(
                     "route_text_color",

@@ -43,8 +43,9 @@ stop_times = list(csv.DictReader(io.StringIO(stop_times_txt)))
 
 for route in routes:
     new_color = MISSING_ROUTE_SERVICE_COLORS.get(route['route_short_name'])[1:] if route['route_short_name'] in MISSING_ROUTE_SERVICE_COLORS else None
-    route['route_color'] = new_color if new_color else 'FFFFFF'
-    route['route_text_color'] = 'FFFFFF' if new_color else '000000'
+    if new_color:
+        route['route_color'] = new_color if new_color else 'FFFFFF'
+        route['route_text_color'] = 'FFFFFF' if new_color else '000000'
     route['agency_id'] = NEW_AGENCY_ID
 
 agency[0]['agency_id'] = NEW_AGENCY_ID
