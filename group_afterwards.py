@@ -59,7 +59,8 @@ grouped_gtfs = get_grouped_gtfs(
         "stops": stops,
         "trips": trips,
         "stop_times": stop_times
-    }
+    },
+    agency_id_replace=NEW_AGENCY_ID
 )
 
 feed_info = [{

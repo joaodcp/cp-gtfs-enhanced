@@ -131,7 +131,7 @@ def build_mappings(lines):
 
 import copy
 
-def get_grouped_gtfs(feed):
+def get_grouped_gtfs(feed, agency_id_replace="3"):
     feed = copy.deepcopy(feed)
 
     routes_by_id = {r["route_id"]: r for r in feed["routes"]}
@@ -251,7 +251,7 @@ def get_grouped_gtfs(feed):
             )
 
             new_routes.append({
-                "agency_id": "1094_CP",
+                "agency_id": agency_id_replace,
                 "line_id": line_id_upper,
                 "line_short_name": line_short_name,
                 "line_long_name": line_long_name,
