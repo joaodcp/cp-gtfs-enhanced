@@ -1,16 +1,18 @@
 from utils.gtfsio import write_gtfs_zip, get_gtfs_zip
 from grouping.group import get_grouped_gtfs
+from utils.names import get_fixed_name
+
+from datetime import datetime
 import os
 import csv
 import io
-
-from utils.names import get_fixed_name
 
 
 OUTPUT_DIR = "./enhanced"
 ORIGINAL_GTFS_ZIP_PATH = os.getenv("GTFS_ZIP_PATH")
 GTFS_ZIP_PATH = os.getenv("GTFS_TO_GROUP_ZIP_PATH")
 NEW_AGENCY_ID = '3'
+NEW_AGENCY_NAME = "Comboios de Portugal"
 
 MISSING_ROUTE_SERVICE_COLORS = {
     'AP': '#7b9a40',
@@ -46,6 +48,7 @@ for route in routes:
     route['agency_id'] = NEW_AGENCY_ID
 
 agency[0]['agency_id'] = NEW_AGENCY_ID
+agency[0]['agency_name'] = NEW_AGENCY_NAME
 
 for stop in stops:
     stop['stop_name'] = get_fixed_name(stop['stop_name'])
@@ -59,6 +62,17 @@ grouped_gtfs = get_grouped_gtfs(
     }
 )
 
+feed_info = [{
+    "feed_publisher_name": "CP - Comboios de Portugal; joaodcp",
+    "feed_publisher_url": "https://github.com/joaodcp/cp-gtfs-enhanced#cp_gtfs_groupedzip",
+    "feed_lang": "pt",
+    "feed_version": datetime.now().strftime("%Y-%m-%d"),
+    # start of current year
+    "feed_start_date": datetime(datetime.now().year, 1, 1).strftime("%Y%m%d"),
+    # end of current year
+    "feed_end_date": datetime(datetime.now().year, 12, 31).strftime("%Y%m%d"),
+}]
+
 output_path_grouped = write_gtfs_zip(
     OUTPUT_DIR,
     "cp_gtfs_grouped.zip",
@@ -68,7 +82,7 @@ output_path_grouped = write_gtfs_zip(
         "routes.txt": grouped_gtfs["routes"],
         "trips.txt": grouped_gtfs["trips"],
         "stops.txt": stops,
-        "feed_info.txt": grouped_gtfs["feed_info"]
+        "feed_info.txt": feed_info
     }
 )
 

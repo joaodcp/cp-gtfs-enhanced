@@ -287,30 +287,4 @@ def get_grouped_gtfs(feed):
                 trip["pattern_id"].rsplit("_", 1)[1]
             )
 
-    # ----------------------------
-    # add feed info
-    # ----------------------------
-    feed["feed_info"] = [{
-        "feed_publisher_name": "CP - Comboios de Portugal; joaodcp",
-        "feed_publisher_url": "https://github.com/joaodcp/cp-gtfs-enhanced",
-        "feed_lang": "pt",
-        "feed_version": datetime.now().strftime("%Y-%m-%d"),
-        # start of current year
-        "feed_start_date": datetime(datetime.now().year, 1, 1).strftime("%Y%m%d"),
-        # end of current year
-        "feed_end_date": datetime(datetime.now().year, 12, 31).strftime("%Y%m%d"),
-    }]
-
-    # ----------------------------
-    # modify agency name
-    # ----------------------------
-    feed["agency"] = [{
-        "agency_id": "3",
-        "agency_name": "Comboios de Portugal",
-        "agency_url": "https://www.cp.pt",
-        "agency_timezone": "Europe/Lisbon",
-        "agency_lang": "pt",
-        "agency_phone": "+351808109110",
-    }]
-
     return feed
